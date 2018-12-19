@@ -1,0 +1,9 @@
+[package]
+name = "planet_proc_gen"
+version = "0.1.0"
+authors = ["azercoco <corentin10simon@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+image = "*"
+rayon = "1.0"
