@@ -10,13 +10,13 @@ pub fn generate_biome_map(seed: i32, size: usize) -> (Vec<Vec<(f64, f64, f64)>>,
     let (seed, color) = random_color(seed);
     let (r, g, b) = color;
 
-    for i in 0..level {
+    for i in 0..level { // color of water
         let q = (i as f64) / (level as f64);
         for j in 0..size {
             biome_map[i][j] = (
-                r / 2.0 + q * r / 2.0,
-                g / 2.0 + q * g / 2.0,
-                b / 2.0 + q * b / 2.0,
+                q.max(0.8)*r / 2.0 ,
+                q.max(0.8)*g / 2.0 ,
+                q.max(0.8)*b / 2.0 ,
             );
         }
     }
@@ -83,7 +83,7 @@ pub fn generate_biome_map(seed: i32, size: usize) -> (Vec<Vec<(f64, f64, f64)>>,
     return (biome_map, level as f64 / size as f64);
 }
 
-fn rand(mut seed: i32) -> (i32, f64) {
+pub fn rand(mut seed: i32) -> (i32, f64) {
     seed += 17;
     seed = hash(seed);
     let m = 100000000;

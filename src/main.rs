@@ -1,5 +1,6 @@
 use rayon::prelude::*;
 
+
 mod biome;
 mod constant;
 mod noise;
@@ -8,7 +9,7 @@ use crate::biome::*;
 use crate::constant::*;
 
 fn main() {
-    for i in 50..100 {
+    for i in 0..99 {
         generate_with_seed(i);
     }
 }
@@ -23,6 +24,12 @@ fn generate_with_seed(seed: i32) {
     let m_square = (multisampling * multisampling) as f64;
 
     let (biome_map, level) = generate_biome_map(seed, BIOME_MAP_SIZE);
+
+    let (i1,theta) = rand(seed);
+    let (i2, phi)  = rand(i1);
+
+    let phi = phi*PI;
+    let normal_ligth = (((theta-0.5)*PI).cos()*phi.sin(), ((theta-0.5)*PI).sin()*phi.sin(), phi.cos());
 
     let pixel_array: Vec<(f64, f64, f64)> = (0..(size * size))
         .into_par_iter()
@@ -40,7 +47,7 @@ fn generate_with_seed(seed: i32) {
                         (2.0 * (x as f64) / (size as f64)) - 1.0 + (i as f64) * d_multisampling;
                     let pz =
                         (2.0 * (y as f64) / (size as f64)) - 1.0 + (j as f64) * d_multisampling;
-                    let (r, g, b) = ray_trace(py, pz, &biome_map, level, seed);
+                    let (r, g, b) = ray_trace(py, pz, &biome_map, level, seed, normal_ligth);
 
                     red += r / m_square;
                     green += g / m_square;
@@ -49,9 +56,9 @@ fn generate_with_seed(seed: i32) {
             }
             (red, green, blue)
         })
-        .collect();
+        .collect(); // ray trace
 
-    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() { // save the image
         let index = (x + y * size) as usize;
         let (red, green, blue) = pixel_array[index];
         *pixel = image::Rgb([
@@ -60,7 +67,7 @@ fn generate_with_seed(seed: i32) {
             (blue * 255.0) as u8,
         ]);
     }
-    imgbuf.save(format!("result-{}.png", seed)).unwrap();
+    imgbuf.save(format!("result/result-{}.png", seed)).unwrap();
 }
 
 fn ray_trace(
@@ -69,6 +76,7 @@ fn ray_trace(
     biome_map: &Vec<Vec<(f64, f64, f64)>>,
     level: f64,
     seed: i32,
+    normal_ligth: (f64,f64,f64),
 ) -> (f64, f64, f64) {
     let s = RADIUS * RADIUS - y * y - z * z;
     if s < 0.0 {
@@ -82,7 +90,7 @@ fn ray_trace(
 
         if heigth >= level {
             let ref_vec = reflect_vector((-1.0, 0.0, 0.0), (nx, ny, nz));
-            let mut cos_r = cos_vec(ref_vec, NORMAL);
+            let mut cos_r = cos_vec(ref_vec, normal_ligth);
 
             if cos_r < 0.0 {
                 cos_r = 0.0;
@@ -90,16 +98,16 @@ fn ray_trace(
                 cos_r = cos_r.powf(A);
             }
 
-            let mut cos = cos_vec((nx, ny, nz), NORMAL);
+            let mut cos = cos_vec((nx, ny, nz), normal_ligth);
             if cos <= 0.05 {
                 cos = 0.05;
             }
 
-            let v = (0.9 * cos + 0.1 * cos_r).min(1.0);
-            return (v * r, v * g, v * b);
+            let v = cos + 0.5*cos_r;
+            return ((v * r).min(1.0), (v * g).min(1.0), (v * b).min(1.0));
         } else {
             let ref_vec = reflect_vector((-1.0, 0.0, 0.0), (x, y, z));
-            let mut cos_r = cos_vec(ref_vec, NORMAL);
+            let mut cos_r = cos_vec(ref_vec, normal_ligth);
 
             if cos_r < 0.0 {
                 cos_r = 0.0;
@@ -107,13 +115,13 @@ fn ray_trace(
                 cos_r = cos_r.powf(A);
             }
 
-            let mut cos = cos_vec((x, y, z), NORMAL);
+            let mut cos = cos_vec((x, y, z), normal_ligth);
             if cos <= 0.05 {
                 cos = 0.05;
             }
 
-            let v = (0.8 * cos + 0.25 * cos_r).min(1.0);
-            return (v * r, v * g, v * b);
+            let v = cos + 2.0*cos_r;
+            return ((v * r).min(1.0), (v * g).min(1.0), (v * b).min(1.0));
         }
     }
 }
