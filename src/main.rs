@@ -1,5 +1,5 @@
 use rayon::prelude::*;
-
+use std::time::Instant;
 
 mod biome;
 mod constant;
@@ -9,8 +9,10 @@ use crate::biome::*;
 use crate::constant::*;
 
 fn main() {
-    for i in 0..99 {
+    for i in 0..200 {
+        let now = Instant::now();
         generate_with_seed(i);
+        println!("Generated Planet n°{} in {:.2}s", i, now.elapsed().as_secs() as f64 + now.elapsed().subsec_nanos() as f64 * 1e-9);
     }
 }
 
@@ -26,7 +28,7 @@ fn generate_with_seed(seed: i32) {
     let (biome_map, level) = generate_biome_map(seed, BIOME_MAP_SIZE);
 
     let (i1,theta) = rand(seed);
-    let (i2, phi)  = rand(i1);
+    let (_i2, phi)  = rand(i1);
 
     let phi = phi*PI;
     let normal_ligth = (((theta-0.5)*PI).cos()*phi.sin(), ((theta-0.5)*PI).sin()*phi.sin(), phi.cos());
@@ -84,7 +86,8 @@ fn ray_trace(
     } else {
         let x = s.sqrt();
 
-        let (nx, ny, nz, heigth) = normal(x, y, z, seed);
+        let heigth = heigth_value(x, y, z, seed);
+        let (nx, ny, nz) = normal(x, y, z, heigth, seed);
         let (r, g, b) = biome_map[(heigth * (BIOME_MAP_SIZE - 1) as f64) as usize]
             [(biome_value(x, y, z, seed) * (BIOME_MAP_SIZE - 1) as f64) as usize];
 
@@ -103,7 +106,7 @@ fn ray_trace(
                 cos = 0.05;
             }
 
-            let v = cos + 0.5*cos_r;
+            let v = (cos + 0.5*cos_r).max(0.05);
             return ((v * r).min(1.0), (v * g).min(1.0), (v * b).min(1.0));
         } else {
             let ref_vec = reflect_vector((-1.0, 0.0, 0.0), (x, y, z));
@@ -120,14 +123,14 @@ fn ray_trace(
                 cos = 0.05;
             }
 
-            let v = cos + 2.0*cos_r;
+            let v = (cos + 2.0*cos_r).max(0.05);
             return ((v * r).min(1.0), (v * g).min(1.0), (v * b).min(1.0));
         }
     }
 }
 
-fn normal(x: f64, y: f64, z: f64, seed: i32) -> (f64, f64, f64, f64) {
-    let heigth0 = heigth_value(x, y, z, seed);
+fn normal(x: f64, y: f64, z: f64, heigth0 : f64, seed: i32) -> (f64, f64, f64) {
+
 
     let theta = y.atan2(x);
     let phi = (z / RADIUS).acos();
@@ -160,7 +163,6 @@ fn normal(x: f64, y: f64, z: f64, seed: i32) -> (f64, f64, f64, f64) {
         dy2 * dz1 - dy1 * dz2,
         dx1 * dz2 - dz1 * dx2,
         dx2 * dy1 - dy2 * dx1,
-        heigth0,
     );
 }
 

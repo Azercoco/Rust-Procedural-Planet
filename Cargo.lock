@@ -200,6 +200,7 @@ version = "0.1.0"
 dependencies = [
  "image 0.20.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rayon 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "simdnoise 2.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -261,6 +262,19 @@ version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "simdeez"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "simdnoise"
+version = "2.3.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "simdeez 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "syn"
 version = "0.15.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -320,6 +334,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum rayon-core 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "b055d1e92aba6877574d8fe604a63c8b5df60f60e5982bf7ccbb1338ea527356"
 "checksum scoped_threadpool 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)" = "1d51f5df5af43ab3f1360b429fa5e0152ac5ce8c0bd6485cae490332e96846a8"
 "checksum scopeguard 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "94258f53601af11e6a49f722422f6e3425c52b06245a5cf9bc09908b174f5e27"
+"checksum simdeez 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "53d1e4a8ee9c44fa7c2d6464b679bd62c6b156edb865f084eb51af7b34efaa63"
+"checksum simdnoise 2.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "7cece18754cd5ed4a5235cef080c9182875c76f5cddc07f66e5b686b9fd7f870"
 "checksum syn 0.15.23 (registry+https://github.com/rust-lang/crates.io-index)" = "9545a6a093a3f0bd59adb472700acc08cad3776f860f16a897dfce8c88721cbc"
 "checksum tiff 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "a2cc6c4fd13cb1cfd20abdb196e794ceccb29371855b7e7f575945f920a5b3c2"
 "checksum unicode-xid 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "fc72304796d0818e357ead4e000d19c9c174ab23dc11093ac919054d20a6a7fc"
